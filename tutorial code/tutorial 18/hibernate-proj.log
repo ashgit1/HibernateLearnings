@@ -1,0 +1,3 @@
+2016-05-01 13:07:49 INFO  HibernateUtil:27 - Initial SessionFactory creation failed.Declaring class is not found in the inheritance state hierarchy: com.ashish.hibernate.model.Address
+2016-05-01 13:09:30 INFO  HibernateUtil:27 - Initial SessionFactory creation failed.Declaring class is not found in the inheritance state hierarchy: com.ashish.hibernate.model.Address
+2016-05-01 15:45:03 INFO  HibernateUtil:27 - Initial SessionFactory creation failed.Illegal attempt to map a non collection as a @OneToMany, @ManyToMany or @CollectionOfElements: com.ashish.hibernate.model.UserDetails.vehicle

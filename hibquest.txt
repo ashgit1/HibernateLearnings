@@ -1,0 +1,240 @@
+List includes my doubts and their clarifications:
+=================================================
+
+1. Difference between Entity and Table as they seems to do the same work with name attribute ?	[Tutorial 4]
+Ans: When you name attribute to entity you are changing the entity name although the same will be assign to the table name as well.
+But when you use table annotation with name attribute you just assign the name to the table without changing the entity name.
+This is useful in HQL where we refer the entity name not the table name. 
+
+====================================================================================================================================
+
+2. Benefits as seen from my eyes of using Hibernate ? 	[Tutorial 5]
+Ans: Firstly ORM
+Automatic conversion of data types from java to SQL. (**)
+
+====================================================================================================================================
+
+3. Different annotations on fileds ? [Tutorial 5]
+Ans: By Default the annotation for every field is "@Basic" which tells hibernate to persist in db.
+
+Also if you don't want any fields to be persisted in db marked that fiels as 'static' or marked it as "@Transient".
+
+While persisting any date field in db the dafult timestamp takes everything (date and time).
+If you want only Date use : "@Temporal (TemporalType.DATE)"
+If you want only Time use : "@Temporal (TemporalType.TIME)"
+
+By default the String to varchar conversion in hb assigns the field length of 255. But if you want the field length to be more then what you are sure of you can use "@Lob" annotation
+
+Lob over String converts to CLOB
+Lob over long converts to BLOB
+
+====================================================================================================================================
+
+4. Difference between session.get() and session.load() ?
+Ans: session.get(Class, id) is used to get the specified object from table by using the primary key.
+
+
+====================================================================================================================================
+
+Tutorial 7:
+Natural key   : Act as a primary. It is of business significance. ex: email id.
+Surrogate key : If there is no suitable primary key in table it acts as a primary key. No business significance. Ex: Serial # 
+
+
+====================================================================================================================================
+
+Tutorial 8:
+-----------
+
+There are 2 types of object: User Object and Value Object in Hibernate.
+User Object  : It describes about itself.(Entity). ex: User Object.
+Value Object : It doesn't adds any meaning to itself. It adds meaning to other User Objects. ex: Address Object inside User Object.
+
+To tell Hibernate that Address is Value Object use the annotation @Embeddable to indicate it can be embedded into other entity.
+And in the entity mark it as @Embedded.
+
+====================================================================================================================================
+
+Tutorial 9:
+-----------
+
+Embedded object attribute overriding.
+We can use @AttributeOverride annotation to override the column names in the main entity object.
+ex: if user has home address as well as office address to be saved in user table. We need to override the column name of Address for 
+one of these Embedded objects. 
+
+ij> describe user_details;
+COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
+------------------------------------------------------------------------------
+USERID              |INTEGER  |0   |10  |10    |GENERATED&|NULL      |NO
+HOME_CITY_NAME      |VARCHAR  |NULL|NULL|255   |NULL      |510       |YES
+HOME_PINCODE        |VARCHAR  |NULL|NULL|255   |NULL      |510       |YES
+HOME_STATE_NAME     |VARCHAR  |NULL|NULL|255   |NULL      |510       |YES
+HOME_STREET_NAME    |VARCHAR  |NULL|NULL|255   |NULL      |510       |YES
+CITY_NAME           |VARCHAR  |NULL|NULL|255   |NULL      |510       |YES
+PIN_CODE            |VARCHAR  |NULL|NULL|255   |NULL      |510       |YES
+STATE_NAME          |VARCHAR  |NULL|NULL|255   |NULL      |510       |YES
+STREET_NAME         |VARCHAR  |NULL|NULL|255   |NULL      |510       |YES
+USERNAME            |VARCHAR  |NULL|NULL|255   |NULL      |510       |YES
+
+We can also use Embedded object as primary key. In this scenario all the members variables of Embedded object together acts as a 
+primary key. No 2 rows will be having the same exact data.
+
+Prepare the embedded object using @Embeddable annotation and then use it in the entity as "@EmbeddedId".
+
+====================================================================================================================================
+
+Tutorial 10: Saving Collections:
+--------------------------------
+We need to insert all the addresses of a user. We can't keep that into multtiple columns in user tables as in tutorial9. 
+Another table needs to be created holding a foreign key to the user table.
+We can use @ElementCollection annotation for an Embedded object to make this object as a seperate table (List of values for a user).
+HB implicitly creates a foreign key pointing to user table. 
+
+====================================================================================================================================
+
+Tutorial 11: Configuring Collections and Adding Keys
+-----------------------------------------------------
+
+In continuation of tut 10, If we want to give some name to the table created by @ElementCollection, we can use @JoinTable annotation.
+Ex:
+@ElementCollection
+@JoinTable(name="USER_ADDRESS", joinColumns=@JoinColumn(name="USER_ID"))
+private Set<Address> listOfAddresses = new HashSet<Address>();
+
+In order to create primary keys for Collection entity in our User Object, make the collection which has indexes. Change the type 
+from Set to ArrayList since it supports indexes. 
+We need to use @CollectionId annotation of hibernate(not jpa) to do this. It has 3 parameters to define the name of the key, 
+generation-type and the type of the field. Need to use @GenericGenerator() to define the auto-generation.
+
+====================================================================================================================================
+
+Tutorial 12: Proxy Objects and Eager and Lazy Fetch Types (Very Important)
+--------------------------------------------------------------------------
+
+Lazy : Get the list when needed. It is default. We should stick to it.
+Eager: Get all the list in the beginning.(Takes lot of resources and time)
+
+Ex: In the above scenarion if we do session.get(User.class, 1) --> It will give only the user details not the list of list of address.
+To get the list of addresses we need to use user.getListOfAddresses(). [Default lazy fetch].
+However we can configure hibernate to do eager fetch.
+
+Proxy Object:
+-------------
+
+For every class created, we have a corressponding proxy created by hb. The proxy will be having the same signature. First hibernate
+gives the value of proxy members (methods) and then the proxy returns the same to parent methods.
+
+Even after closing the session you want the address size, add attribute fetch to @ElementCollection(fetch=FetchType.EAGER) so that 
+it will return the count eagerly. 
+====================================================================================================================================
+
+Tutorial 13: One To One Mapping
+-------------------------------
+
+Use Case: One user is having one vehicel only.
+Now User and Vehicle are two User Object. We need to link them. Inside user create an instance of Vehicle and annote it with
+@OneToOne annotation. The foreign key in User will point to primary key in Vehicle.
+
+====================================================================================================================================
+
+Tutorial 14: One To Many Mapping
+--------------------------------
+
+Use Case: One user is having many vehicles.
+@OneToMany annotation is used. It creates an extra table which contains primary key of the two tables as foreign keys.
+We can change the name of this table and the columns of this table by using @JoinTable annotation.
+
+@JoinTable(name="USER_VEHICLE", joinColumns=@JoinColumn(name="USER_ID"), inverseJoinColumns=@JoinColumn(name="VEHICLE_ID")
+private Collection<Vehicle> vehicle = new ArrayList<Vehicle>();
+
+The mapping table must be a collection type since we are using one to many.
+
+We can also configure @ManyToOne inside Vehicle to do a bi-directional mapping. In this we we can get a user for a vehicle by 
+using vehicle.getUser();
+
+====================================================================================================================================
+
+Tutorial 15: mappedBy and Many To Many Mapping
+----------------------------------------------
+
+If we don't want to create an extra table as above in tut 14, use @OneToMany(mappedBy="user") in User entity for the user object in
+Vehicle. This will create a user_id in vehicle table itself. 	
+
+
+Many to Many: We need to have a separate table for this. We will have vehicle collection in user object as well as user collection 
+in vehicle object.
+
+Also we need to use @ManyToMany(mappedBy="XXXX") in one of the User Objects to avoid craetion of duplicate table.
+
+MappedBy attribute:
+-------------------
+With the mappedBy, you directly tell Hibernate/JPA that one table owns the relationship, and therefore it is stored as a column of that table.
+Without, the relationship is external and Hibernate/JPA need to create another table to store the relationship.
+
+====================================================================================================================================
+
+Tutorial 16: CascadeTypes and Other Things
+------------------------------------------
+
+Skipped.
+
+====================================================================================================================================
+
+Tutorial 17 : Implementing Inheritance
+---------------------------------------
+
+There is no corresponding implementaion of Inheritance in ORM. This is challenging to implement.
+By Default hb implements "Single Table Inheritance". Even if you have multiple entities and if some entities inherit from some base 
+class hb will by-default create a single table with all the values.
+ex: Vehicle class (parent) and TwoWheeler and FourWheeler class extends Vehicle class. Everything gets stored in Vehicle table.
+For the sub-classes a new row is created and added into Vehicle table.
+In our example three extra coulmns gets generated. DTYPE(What's Class type), SteeringHandle, SteeringWheel. 
+
+The DType is called discriminator. 
+====================================================================================================================================
+
+Tutorial 18: Single Table Strategy:
+-----------------------------------
+
+All the objects are stored in a single table.
+
+The DType is called discriminator. We can configur this DType by using @Inheritance, @Discriminator annotations on parent class.
+i.e on Vehicle.
+
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="VEHICLE_TYPE", discriminatorType=DiscriminatorType.STRING)
+
+Also if we need to give different names to DTYPE(TwoWheeler and FourWheeler) to sub classes, we can configure the sub-classes by
+@DiscriminatorValue("Value"). This gives the configured names in the DTYPE column of vehicle for sub-classes objects.
+
+====================================================================================================================================
+
+Tutorial 19 : Implementing Inheritance With Table Per Class Strategy
+---------------------------------------------------------------------
+
+We don't need to have the DType column if we are going for table per class strategy.
+Remove the @DiscriminatorColumn from Vehicle and @DiscriminatorValue from the sub-classes.
+Mark the Vehicle class as Entity and annoatte it as @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
+
+For each sub-class a table is created. 
+The sub-class tables gets the columns from the parent class. It also gets the auto-generation of primary key features of parent 
+to the sub-class tables.
+
+====================================================================================================================================
+
+Tutorial 20: Implementing Inheritance With Joined Strategy
+-----------------------------------------------------------
+
+Single table Inheritance    : Not Normalised. (Many columns are null)
+Table per Class Inheriatnce : Slightly Normalised. (Involves Duplication of parent columns to child tables)
+Joined Inheritance 			: Best Normalised. (Properties inherited from parent are persisted in parent class)
+
+In Joined Strategy : The inherited members goes to parent table only. The child table contains its data member defined in the entity
+along with the id of the parent(i.e foreign key).
+
+We mark the parent with @Inheritance(strategy=InheritanceType.JOINED) and keep the sub-classes as entity.
+
+In order to get all the data we need to do a join of both the tables.
+
+====================================================================================================================================
