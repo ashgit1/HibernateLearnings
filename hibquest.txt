@@ -100,7 +100,7 @@ In continuation of tut 10, If we want to give some name to the table created by 
 Ex:
 @ElementCollection
 @JoinTable(name="USER_ADDRESS", joinColumns=@JoinColumn(name="USER_ID"))
-private Set<Address> listOfAddresses = new HashSet<Address>();
+private Collection<Address> listOfAddresses = new ArrayList<Address>();
 
 In order to create primary keys for Collection entity in our User Object, make the collection which has indexes. Change the type 
 from Set to ArrayList since it supports indexes. 
@@ -215,7 +215,7 @@ Tutorial 19 : Implementing Inheritance With Table Per Class Strategy
 
 We don't need to have the DType column if we are going for table per class strategy.
 Remove the @DiscriminatorColumn from Vehicle and @DiscriminatorValue from the sub-classes.
-Mark the Vehicle class as Entity and annoatte it as @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
+Mark the Vehicle class as Entity and annotate it as @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 
 For each sub-class a table is created. 
 The sub-class tables gets the columns from the parent class. It also gets the auto-generation of primary key features of parent 
@@ -238,3 +238,46 @@ We mark the parent with @Inheritance(strategy=InheritanceType.JOINED) and keep t
 In order to get all the data we need to do a join of both the tables.
 
 ====================================================================================================================================
+
+Tutorial 21: CRUD operations:
+-----------------------------
+
+C: session.save(user);
+R: session.get(user.class, 1);
+U: session.update(user). For update we need to pass the user object. It involves three steps. First get the user, second update any
+   of its members and third pass it to the update() method.
+D: session.delete(user). For deleting we need to pass the user object. It involves two steps. First get the object and then pass it
+   to the delete() method.
+
+====================================================================================================================================
+
+Tutorial 22: Transient, Persistent and Detached Objects:
+--------------------------------------------------------
+
+Transient  : We created the user object but still didn't save. It is in transient state. It is not handed over to hb. hb is not \
+		 	 going to track changes.
+
+Persistent : Once the user is handed to hb by calling session.save(user) it becomes persistent. Any changes made to the user object
+			 reflects in the database. hb is going to track the changes. It also monitors the no of updates and updates the last 
+			 state of the objects in db.
+
+Detached   : Once you close the session.close(), it becomes detached object in the sense hb is not going to track the changes. It 
+			 means this object was once tracked by hb but no longer now.
+
+====================================================================================================================================
+
+
+====================================================================================================================================
+
+
+====================================================================================================================================
+
+
+====================================================================================================================================
+
+
+====================================================================================================================================
+
+
+====================================================================================================================================
+
