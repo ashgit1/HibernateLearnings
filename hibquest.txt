@@ -431,6 +431,28 @@ criteria.add(Restrictions.or(Restrictions.between("userId", 1, 3), Restrictions.
 
 ====================================================================================================================================
 
+Tutorial 31: Projections and Query By Example
+---------------------------------------------
+
+These are Criteria API features. 
+Projection is for aggregation functions, group functions. 
+ex: 
+Criteria criteria = session.createCriteria(UserDetails.class)
+					.setProjection(Projections.min("userId"));
+				 // .setProjection(Projections.count("userId"));	
+
+Criteria criteria = session.createCriteria(UserDetails.class)
+					.addOrder(Order.desc("userId"));					
+Query by Example:
+-----------------
+
+To filter the query based on your own condition :
+
+UserDetails exampleUser = new UserDetails();
+exampleUser.setUserName("user1%");
+Example example = Example.create(exampleUser).enableLike();
+Criteria criteria = session.createCriteria(UserDetails.class)
+						   .add(example);
 
 ====================================================================================================================================
 
