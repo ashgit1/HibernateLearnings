@@ -366,6 +366,22 @@ query.setString("UserName", userName);
 
 ====================================================================================================================================
 
+Tutorial 28: Named Queries
+---------------------------
 
+Instead of writing queries again and again at different place we can write a 'named query' in the entity class and then reference
+it by calling session.getNamedQuery("NAME"); 
+The annotation is defined in the entity class as "@NamedQuery(name="", query="")"
+where, name= identifier in the program and query= actual hql/sql query.
+ex:
+@Entity
+@NamedQuery(name="UserDetails.byId", query="from UserDetails where userId = ?")
+
+Also we can plain native sql queries in Named Queries by using "@NamedNativeQuery(name="", query="", resultClass=UserDetails.class)".
+Notice that here we are also defining the result class since this query will return the records of UserDetails class.
+ex: 
+@NamedNativeQuery(name="UserDetails.byName", query="select * from user_details where user_name = ? ", resultClass=UserDetails.class)
+
+Try to use @NamedQuery over @NamedNativeQuery as hb is all about using hql not sql.
 
 ====================================================================================================================================
