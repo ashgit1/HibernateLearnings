@@ -254,7 +254,7 @@ D: session.delete(user). For deleting we need to pass the user object. It involv
 Tutorial 22: Transient, Persistent and Detached Objects:
 --------------------------------------------------------
 
-Transient  : We created the user object but still didn't save. It is in transient state. It is not handed over to hb. hb is not \
+Transient  : We created the user object but still didn't save. It is in transient state. It is not handed over to hb. hb is not 
 		 	 going to track changes.
 
 Persistent : Once the user is handed to hb by calling session.save(user) it becomes persistent. Any changes made to the user object
@@ -266,15 +266,78 @@ Detached   : Once you close the session.close(), it becomes detached object in t
 
 ====================================================================================================================================
 
+Tutorial 23: Understanding State Changes [No Code]
+--------------------------------------------------
+
+State of an object in CRUD Opeartions:
+
+1. Object states - Create:
+new () 			= Transient
+session.save() 	= Persisitent
+session.close()	= Detached
+
+2. Object states - Read
+There is no transient since the object we are reading is there in db.
+session.get()   = Persistent
+session.close() = Detached
+
+3. Object states - Update
+It can happen in both the above ways.
+
+4. Object states - Delete
+
+session.delete() = After deleting the persistent objects becomes transient.
+session.close()  = Detached.
+
+Note : The change from transient -> persisitent -> detached happens due to session object.(session.save()) and session.close()
 
 ====================================================================================================================================
 
+Tutorial 24: Persisting Detached Objects
+----------------------------------------
+
+If we need to persist the detached object simply open another session, update the actual entity object and try to update it using 
+session.update(). It will bring the object into persistent state.
+
+If you don't update any data members of the entity bean but calling the session.update() it will try to run update query implicitly.
+To overcome the default, an update should happen only if the entity is changes we need to use hibernate Entity annotation.
+ex: @org.hibernate.annotations.Entity(selectBeforeUpdate=true)
+This will check before updating whether anything has changed in the entity object.
+
+For this tutorial atleast one record should be existing in the database.
 
 ====================================================================================================================================
 
+Tutorial 25: Introducing HQL and the Query Object
+-------------------------------------------------
+
+HQL : Hibernate Query Language. In SQL we think of tables, but in hql we think of objects/entity.
+We use a Query object here, 
+Query query = session.createQuery("from ClassName"); 
+List list = query.list();
+
+Also instead of column names we use data members name and instead of returning record sets hb returns a list of entity.
 
 ====================================================================================================================================
 
+Tutorial 26 : Select and Pagination in HQL
+------------------------------------------
+
+For this tutorial ensure the table is having atleast 10-20 records.
+One of the drawbacks of query.list() is that it returns all the columns.
+
+Pagination :
+------------
+
+Query query = session.createQuery("from UserDetails");
+query.setFirstResult(5);  // start after skipping the first 5 row.
+query.setMaxResults(4);   // give the next 4 rows.
+
+The derby dialect : select userdetail0_.USER_ID as USER1_0_, userdetail0_.USER_NAME as USER2_0_ from USER_DETAILS userdetail0_ 
+offset 2 rows fetch next 5 rows only
+i.e : select user_id, user_name from user_details offset 2 rows fetch next 5 rows only;
+
+If we need only a single column then do (select username from UserDetails) --> returns a list of String(single column).
 
 ====================================================================================================================================
 
