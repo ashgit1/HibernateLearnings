@@ -456,6 +456,21 @@ Criteria criteria = session.createCriteria(UserDetails.class)
 
 ====================================================================================================================================
 
+Tutorial 32: Caching in hibernate
+---------------------------------
+
+First level Cache  : Session object.
+Second Level Cache : SessionFactory object.
+1. Across different sessions in an applications
+2. Across applications.
+3. Across clusters. (Different apps using same db)
+
+First level: Within a session, if we try to get the same object multiple times it will return single sql statememts since it is 
+there in the session object.
+
+If we close the session and then try to get the same object in a different session then this time 2 select statements will be 
+executed.
+
 
 ====================================================================================================================================
 
