@@ -407,3 +407,35 @@ List<UserDetails> crlist = (List<UserDetails>) criteria.list();
 We have only used eq() methods of Restrictions class. There are many mathods.
 
 ====================================================================================================================================
+
+Tutorial 30: Understanding Restrictions
+----------------------------------------
+
+One good advantage of Criteria is that we can use chaining. Adding more Restrictions to the query.
+ex:
+Criteria criteria = session.createCriteria(UserDetails.class);
+
+criteria.add(Restrictions.gt("userId", 5))
+.add(Restrictions.eq("userName", "user10"))
+;
+
+criteria.add(Restrictions.like("userName", "%user1%"))
+.add(Restrictions.between("userId", 5, 20))
+;
+
+All the above criterias are doing a conjunction (and) operations. If we need to perform 'or' operations in the query we can do by
+using Restrictions.or(Rest1, Rest2);
+ex: 
+criteria.add(Restrictions.or(Restrictions.between("userId", 1, 3), Restrictions.between("userId", 5,8)));
+
+
+====================================================================================================================================
+
+
+====================================================================================================================================
+
+
+====================================================================================================================================
+
+
+====================================================================================================================================
