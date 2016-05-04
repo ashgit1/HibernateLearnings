@@ -474,5 +474,26 @@ executed.
 
 ====================================================================================================================================
 
+Tutorial 33: Configuring Second Level Cache
+-------------------------------------------
+
+Second Level: It exists between muliptle sessions within the Sessionfactory. Even if we close and open the session multiple times
+it will run only one select clause. It will look into the second level cache(SessionFactory). By default the second level cache
+is disabled and we need to enable it in the hibernate.cfg.xml file and mark what entities must be available in 2nd level cache.
+
+How to configure for second level cache ?
+
+1. Inside hibernate.cfg.xml : 
+<!-- Second-level cache -->
+<property name="cache.use_second_level_cache">true</property>
+<property name="cache.provider_class">org.hibernate.cache.EhCacheProvider</property>
+
+2. We need to add the ehcache-core-2.4.2.jar to the class path since we have choosen to use that provider.
+
+3. Configurng the entity. Telling hibernate that this entity should be available in second-level cache.
+@Entity
+@Cacheable
+@Cache(usage=CacheConcurrencyStrategy.READ_ONLY)
+Class user{}
 
 ====================================================================================================================================

@@ -1,0 +1,9 @@
+2016-05-01 13:07:49 INFO  HibernateUtil:27 - Initial SessionFactory creation failed.Declaring class is not found in the inheritance state hierarchy: com.ashish.hibernate.model.Address
+2016-05-01 13:09:30 INFO  HibernateUtil:27 - Initial SessionFactory creation failed.Declaring class is not found in the inheritance state hierarchy: com.ashish.hibernate.model.Address
+2016-05-01 15:45:03 INFO  HibernateUtil:27 - Initial SessionFactory creation failed.Illegal attempt to map a non collection as a @OneToMany, @ManyToMany or @CollectionOfElements: com.ashish.hibernate.model.UserDetails.vehicle
+2016-05-01 19:40:33 INFO  HibernateUtil:27 - Initial SessionFactory creation failed.Cannot use identity column key generation with <union-subclass> mapping for: com.ashish.hibernate.model.TwoWheeler
+2016-05-01 19:41:42 INFO  HibernateUtil:27 - Initial SessionFactory creation failed.Cannot use identity column key generation with <union-subclass> mapping for: com.ashish.hibernate.model.TwoWheeler
+2016-05-01 19:50:05 INFO  HibernateUtil:27 - Initial SessionFactory creation failed.Cannot use identity column key generation with <union-subclass> mapping for: com.ashish.hibernate.model.TwoWheeler
+2016-05-01 19:52:24 INFO  HibernateUtil:27 - Initial SessionFactory creation failed.Cannot use identity column key generation with <union-subclass> mapping for: com.ashish.hibernate.model.TwoWheeler
+2016-05-04 19:09:38 INFO  HibernateUtil:27 - Initial SessionFactory creation failed.could not instantiate RegionFactory [org.hibernate.cache.impl.bridge.RegionFactoryCacheProviderBridge]
+2016-05-04 19:13:18 INFO  HibernateUtil:27 - Initial SessionFactory creation failed.could not instantiate RegionFactory [org.hibernate.cache.impl.bridge.RegionFactoryCacheProviderBridge]
