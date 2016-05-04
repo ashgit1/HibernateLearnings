@@ -497,3 +497,25 @@ How to configure for second level cache ?
 Class user{}
 
 ====================================================================================================================================
+
+Tutorial 34: Using Query Cache
+-------------------------------
+
+If we get the objects using session.createQuery("query"), then even is we try to get the same objects in multiple sessions and 
+second-level cache being enabled, it will run two select statements. Reason hb differentiates second-level cache and query cache.
+The results of both are kept in different memeory locations. To overcome this we need to use query cache. It is not enable by default.
+
+To enable it in hibernate.cfg.xml :
+<property name="cache.use_query_cache">true</property> 
+     &
+Query query = session.createQuery("from UserDetails where userId = 3");    
+query.setCacheable(true);
+
+What does setCacheable() does ?
+It first checks the Cache for the query and if it is not there it will hit the database and if it is there in the cache then it will
+read it from the cache instead of going to the db.
+
+We need to be careful while using query cache as it may lead to performance issue if the same db is being used bu multiple applications
+or the query is cached but not used for long time.
+
+====================================================================================================================================
