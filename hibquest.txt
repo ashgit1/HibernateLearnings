@@ -385,3 +385,25 @@ ex:
 Try to use @NamedQuery over @NamedNativeQuery as hb is all about using hql not sql.
 
 ====================================================================================================================================
+
+Tutorial 29: Introduction to Criteria API
+------------------------------------------
+
+There are three ways to get data from hb:
+1. Using simple session.get();
+2. Using simple HQL.
+3. Using the Criteria API.
+
+Problems with HQL : In many ways it resembles sql. Therefore maintining large HQL queries becomes cumbersome.
+Solution : Criteria API. 
+
+A Criteria is like a where clause where you will be imposing restrictions. It needs to know for which entity you are imposing the
+restrictions. After creating the criteria object to add the restrictions what you need.
+ex: 
+Criteria criteria = session.createCriteria(UserDetails.class);
+criteria.add(Restrictions.eq("userName", "user10"));
+List<UserDetails> crlist = (List<UserDetails>) criteria.list();
+
+We have only used eq() methods of Restrictions class. There are many mathods.
+
+====================================================================================================================================
