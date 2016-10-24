@@ -1,0 +1,521 @@
+List includes my doubts and their clarifications:
+=================================================
+
+1. Difference between Entity and Table as they seems to do the same work with name attribute ?	[Tutorial 4]
+Ans: When you name attribute to entity you are changing the entity name although the same will be assign to the table name as well.
+But when you use table annotation with name attribute you just assign the name to the table without changing the entity name.
+This is useful in HQL where we refer the entity name not the table name. 
+
+====================================================================================================================================
+
+2. Benefits as seen from my eyes of using Hibernate ? 	[Tutorial 5]
+Ans: Firstly ORM
+Automatic conversion of data types from java to SQL. (**)
+
+====================================================================================================================================
+
+3. Different annotations on fileds ? [Tutorial 5]
+Ans: By Default the annotation for every field is "@Basic" which tells hibernate to persist in db.
+
+Also if you don't want any fields to be persisted in db marked that fiels as 'static' or marked it as "@Transient".
+
+While persisting any date field in db the dafult timestamp takes everything (date and time).
+If you want only Date use : "@Temporal (TemporalType.DATE)"
+If you want only Time use : "@Temporal (TemporalType.TIME)"
+
+By default the String to varchar conversion in hb assigns the field length of 255. But if you want the field length to be more then what you are sure of you can use "@Lob" annotation
+
+Lob over String converts to CLOB
+Lob over long converts to BLOB
+
+====================================================================================================================================
+
+4. Difference between session.get() and session.load() ?
+Ans: session.get(Class, id) is used to get the specified object from table by using the primary key.
+
+
+====================================================================================================================================
+
+Tutorial 7:
+Natural key   : Act as a primary. It is of business significance. ex: email id.
+Surrogate key : If there is no suitable primary key in table it acts as a primary key. No business significance. Ex: Serial # 
+
+
+====================================================================================================================================
+
+Tutorial 8:
+-----------
+
+There are 2 types of object: User Object and Value Object in Hibernate.
+User Object  : It describes about itself.(Entity). ex: User Object.
+Value Object : It doesn't adds any meaning to itself. It adds meaning to other User Objects. ex: Address Object inside User Object.
+
+To tell Hibernate that Address is Value Object use the annotation @Embeddable to indicate it can be embedded into other entity.
+And in the entity mark it as @Embedded.
+
+====================================================================================================================================
+
+Tutorial 9:
+-----------
+
+Embedded object attribute overriding.
+We can use @AttributeOverride annotation to override the column names in the main entity object.
+ex: if user has home address as well as office address to be saved in user table. We need to override the column name of Address for 
+one of these Embedded objects. 
+
+ij> describe user_details;
+COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
+------------------------------------------------------------------------------
+USERID              |INTEGER  |0   |10  |10    |GENERATED&|NULL      |NO
+HOME_CITY_NAME      |VARCHAR  |NULL|NULL|255   |NULL      |510       |YES
+HOME_PINCODE        |VARCHAR  |NULL|NULL|255   |NULL      |510       |YES
+HOME_STATE_NAME     |VARCHAR  |NULL|NULL|255   |NULL      |510       |YES
+HOME_STREET_NAME    |VARCHAR  |NULL|NULL|255   |NULL      |510       |YES
+CITY_NAME           |VARCHAR  |NULL|NULL|255   |NULL      |510       |YES
+PIN_CODE            |VARCHAR  |NULL|NULL|255   |NULL      |510       |YES
+STATE_NAME          |VARCHAR  |NULL|NULL|255   |NULL      |510       |YES
+STREET_NAME         |VARCHAR  |NULL|NULL|255   |NULL      |510       |YES
+USERNAME            |VARCHAR  |NULL|NULL|255   |NULL      |510       |YES
+
+We can also use Embedded object as primary key. In this scenario all the members variables of Embedded object together acts as a 
+primary key. No 2 rows will be having the same exact data.
+
+Prepare the embedded object using @Embeddable annotation and then use it in the entity as "@EmbeddedId".
+
+====================================================================================================================================
+
+Tutorial 10: Saving Collections:
+--------------------------------
+We need to insert all the addresses of a user. We can't keep that into multtiple columns in user tables as in tutorial9. 
+Another table needs to be created holding a foreign key to the user table.
+We can use @ElementCollection annotation for an Embedded object to make this object as a seperate table (List of values for a user).
+HB implicitly creates a foreign key pointing to user table. 
+
+====================================================================================================================================
+
+Tutorial 11: Configuring Collections and Adding Keys
+-----------------------------------------------------
+
+In continuation of tut 10, If we want to give some name to the table created by @ElementCollection, we can use @JoinTable annotation.
+Ex:
+@ElementCollection
+@JoinTable(name="USER_ADDRESS", joinColumns=@JoinColumn(name="USER_ID"))
+private Collection<Address> listOfAddresses = new ArrayList<Address>();
+
+In order to create primary keys for Collection entity in our User Object, make the collection which has indexes. Change the type 
+from Set to ArrayList since it supports indexes. 
+We need to use @CollectionId annotation of hibernate(not jpa) to do this. It has 3 parameters to define the name of the key, 
+generation-type and the type of the field. Need to use @GenericGenerator() to define the auto-generation.
+
+====================================================================================================================================
+
+Tutorial 12: Proxy Objects and Eager and Lazy Fetch Types (Very Important)
+--------------------------------------------------------------------------
+
+Lazy : Get the list when needed. It is default. We should stick to it.
+Eager: Get all the list in the beginning.(Takes lot of resources and time)
+
+Ex: In the above scenarion if we do session.get(User.class, 1) --> It will give only the user details not the list of list of address.
+To get the list of addresses we need to use user.getListOfAddresses(). [Default lazy fetch].
+However we can configure hibernate to do eager fetch.
+
+Proxy Object:
+-------------
+
+For every class created, we have a corressponding proxy created by hb. The proxy will be having the same signature. First hibernate
+gives the value of proxy members (methods) and then the proxy returns the same to parent methods.
+
+Even after closing the session you want the address size, add attribute fetch to @ElementCollection(fetch=FetchType.EAGER) so that 
+it will return the count eagerly. 
+====================================================================================================================================
+
+Tutorial 13: One To One Mapping
+-------------------------------
+
+Use Case: One user is having one vehicel only.
+Now User and Vehicle are two User Object. We need to link them. Inside user create an instance of Vehicle and annote it with
+@OneToOne annotation. The foreign key in User will point to primary key in Vehicle.
+
+====================================================================================================================================
+
+Tutorial 14: One To Many Mapping
+--------------------------------
+
+Use Case: One user is having many vehicles.
+@OneToMany annotation is used. It creates an extra table which contains primary key of the two tables as foreign keys.
+We can change the name of this table and the columns of this table by using @JoinTable annotation.
+
+@JoinTable(name="USER_VEHICLE", joinColumns=@JoinColumn(name="USER_ID"), inverseJoinColumns=@JoinColumn(name="VEHICLE_ID")
+private Collection<Vehicle> vehicle = new ArrayList<Vehicle>();
+
+The mapping table must be a collection type since we are using one to many.
+
+We can also configure @ManyToOne inside Vehicle to do a bi-directional mapping. In this we we can get a user for a vehicle by 
+using vehicle.getUser();
+
+====================================================================================================================================
+
+Tutorial 15: mappedBy and Many To Many Mapping
+----------------------------------------------
+
+If we don't want to create an extra table as above in tut 14, use @OneToMany(mappedBy="user") in User entity for the user object in
+Vehicle. This will create a user_id in vehicle table itself. 	
+
+
+Many to Many: We need to have a separate table for this. We will have vehicle collection in user object as well as user collection 
+in vehicle object.
+
+Also we need to use @ManyToMany(mappedBy="XXXX") in one of the User Objects to avoid craetion of duplicate table.
+
+MappedBy attribute:
+-------------------
+With the mappedBy, you directly tell Hibernate/JPA that one table owns the relationship, and therefore it is stored as a column of that table.
+Without, the relationship is external and Hibernate/JPA need to create another table to store the relationship.
+
+====================================================================================================================================
+
+Tutorial 16: CascadeTypes and Other Things
+------------------------------------------
+
+Skipped.
+
+====================================================================================================================================
+
+Tutorial 17 : Implementing Inheritance
+---------------------------------------
+
+There is no corresponding implementaion of Inheritance in ORM. This is challenging to implement.
+By Default hb implements "Single Table Inheritance". Even if you have multiple entities and if some entities inherit from some base 
+class hb will by-default create a single table with all the values.
+ex: Vehicle class (parent) and TwoWheeler and FourWheeler class extends Vehicle class. Everything gets stored in Vehicle table.
+For the sub-classes a new row is created and added into Vehicle table.
+In our example three extra coulmns gets generated. DTYPE(What's Class type), SteeringHandle, SteeringWheel. 
+
+The DType is called discriminator. 
+====================================================================================================================================
+
+Tutorial 18: Single Table Strategy:
+-----------------------------------
+
+All the objects are stored in a single table.
+
+The DType is called discriminator. We can configur this DType by using @Inheritance, @Discriminator annotations on parent class.
+i.e on Vehicle.
+
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="VEHICLE_TYPE", discriminatorType=DiscriminatorType.STRING)
+
+Also if we need to give different names to DTYPE(TwoWheeler and FourWheeler) to sub classes, we can configure the sub-classes by
+@DiscriminatorValue("Value"). This gives the configured names in the DTYPE column of vehicle for sub-classes objects.
+
+====================================================================================================================================
+
+Tutorial 19 : Implementing Inheritance With Table Per Class Strategy
+---------------------------------------------------------------------
+
+We don't need to have the DType column if we are going for table per class strategy.
+Remove the @DiscriminatorColumn from Vehicle and @DiscriminatorValue from the sub-classes.
+Mark the Vehicle class as Entity and annotate it as @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
+
+For each sub-class a table is created. 
+The sub-class tables gets the columns from the parent class. It also gets the auto-generation of primary key features of parent 
+to the sub-class tables.
+
+====================================================================================================================================
+
+Tutorial 20: Implementing Inheritance With Joined Strategy
+-----------------------------------------------------------
+
+Single table Inheritance    : Not Normalised. (Many columns are null)
+Table per Class Inheriatnce : Slightly Normalised. (Involves Duplication of parent columns to child tables)
+Joined Inheritance 			: Best Normalised. (Properties inherited from parent are persisted in parent class)
+
+In Joined Strategy : The inherited members goes to parent table only. The child table contains its data member defined in the entity
+along with the id of the parent(i.e foreign key).
+
+We mark the parent with @Inheritance(strategy=InheritanceType.JOINED) and keep the sub-classes as entity.
+
+In order to get all the data we need to do a join of both the tables.
+
+====================================================================================================================================
+
+Tutorial 21: CRUD operations:
+-----------------------------
+
+C: session.save(user);
+R: session.get(user.class, 1);
+U: session.update(user). For update we need to pass the user object. It involves three steps. First get the user, second update any
+   of its members and third pass it to the update() method.
+D: session.delete(user). For deleting we need to pass the user object. It involves two steps. First get the object and then pass it
+   to the delete() method.
+
+====================================================================================================================================
+
+Tutorial 22: Transient, Persistent and Detached Objects:
+--------------------------------------------------------
+
+Transient  : We created the user object but still didn't save. It is in transient state. It is not handed over to hb. hb is not 
+		 	 going to track changes.
+
+Persistent : Once the user is handed to hb by calling session.save(user) it becomes persistent. Any changes made to the user object
+			 reflects in the database. hb is going to track the changes. It also monitors the no of updates and updates the last 
+			 state of the objects in db.
+
+Detached   : Once you close the session.close(), it becomes detached object in the sense hb is not going to track the changes. It 
+			 means this object was once tracked by hb but no longer now.
+
+====================================================================================================================================
+
+Tutorial 23: Understanding State Changes [No Code]
+--------------------------------------------------
+
+State of an object in CRUD Opeartions:
+
+1. Object states - Create:
+new () 			= Transient
+session.save() 	= Persisitent
+session.close()	= Detached
+
+2. Object states - Read
+There is no transient since the object we are reading is there in db.
+session.get()   = Persistent
+session.close() = Detached
+
+3. Object states - Update
+It can happen in both the above ways.
+
+4. Object states - Delete
+
+session.delete() = After deleting the persistent objects becomes transient.
+session.close()  = Detached.
+
+Note : The change from transient -> persisitent -> detached happens due to session object.(session.save()) and session.close()
+
+====================================================================================================================================
+
+Tutorial 24: Persisting Detached Objects
+----------------------------------------
+
+If we need to persist the detached object simply open another session, update the actual entity object and try to update it using 
+session.update(). It will bring the object into persistent state.
+
+If you don't update any data members of the entity bean but calling the session.update() it will try to run update query implicitly.
+To overcome the default, an update should happen only if the entity is changes we need to use hibernate Entity annotation.
+ex: @org.hibernate.annotations.Entity(selectBeforeUpdate=true)
+This will check before updating whether anything has changed in the entity object.
+
+For this tutorial atleast one record should be existing in the database.
+
+====================================================================================================================================
+
+Tutorial 25: Introducing HQL and the Query Object
+-------------------------------------------------
+
+HQL : Hibernate Query Language. In SQL we think of tables, but in hql we think of objects/entity.
+We use a Query object here, 
+Query query = session.createQuery("from ClassName"); 
+List list = query.list();
+
+Also instead of column names we use data members name and instead of returning record sets hb returns a list of entity.
+
+====================================================================================================================================
+
+Tutorial 26 : Select and Pagination in HQL
+------------------------------------------
+
+For this tutorial ensure the table is having atleast 10-20 records.
+One of the drawbacks of query.list() is that it returns all the columns.
+
+Pagination :
+------------
+
+Query query = session.createQuery("from UserDetails");
+query.setFirstResult(5);  // start after skipping the first 5 row.
+query.setMaxResults(4);   // give the next 4 rows.
+
+The derby dialect : select userdetail0_.USER_ID as USER1_0_, userdetail0_.USER_NAME as USER2_0_ from USER_DETAILS userdetail0_ 
+offset 2 rows fetch next 5 rows only
+i.e : select user_id, user_name from user_details offset 2 rows fetch next 5 rows only;
+
+If we need only a single column then do (select username from UserDetails) --> returns a list of String(single column).
+
+====================================================================================================================================
+
+Tutorial 27: Understanding Parameter Binding and SQL Injection
+---------------------------------------------------------------
+
+SQL Injection: Hackers can pass smart querries as input to your fields and can get desired result. Explained in eg.
+String userId = "5 or 1=1 ";
+Query query = session.createQuery("from UserDetails where userId > " + userId);
+This will return all the rows since 1=1 is always true.
+
+The solution to above is to use :
+---------------------------------
+1. position parameter substituion (?).
+ex: 
+Query query = session.createQuery("from UserDetails where userId > ?");
+query.setInteger(0, Integer.parseInt(userId));
+
+2. named parameter substitution (:name)
+To get rid of the position of '?' and give some meaningful name, we use named parameter substituion.
+ex: 
+Query query = session.createQuery("from UserDetails where userId > :UserID and userName = :UserName");
+query.setInteger("UserID", Integer.parseInt(userId));
+query.setString("UserName", userName);
+
+
+====================================================================================================================================
+
+Tutorial 28: Named Queries
+---------------------------
+
+Instead of writing queries again and again at different place we can write a 'named query' in the entity class and then reference
+it by calling session.getNamedQuery("NAME"); 
+The annotation is defined in the entity class as "@NamedQuery(name="", query="")"
+where, name= identifier in the program and query= actual hql/sql query.
+ex:
+@Entity
+@NamedQuery(name="UserDetails.byId", query="from UserDetails where userId = ?")
+
+Also we can plain native sql queries in Named Queries by using "@NamedNativeQuery(name="", query="", resultClass=UserDetails.class)".
+Notice that here we are also defining the result class since this query will return the records of UserDetails class.
+ex: 
+@NamedNativeQuery(name="UserDetails.byName", query="select * from user_details where user_name = ? ", resultClass=UserDetails.class)
+
+Try to use @NamedQuery over @NamedNativeQuery as hb is all about using hql not sql.
+
+====================================================================================================================================
+
+Tutorial 29: Introduction to Criteria API
+------------------------------------------
+
+There are three ways to get data from hb:
+1. Using simple session.get();
+2. Using simple HQL.
+3. Using the Criteria API.
+
+Problems with HQL : In many ways it resembles sql. Therefore maintining large HQL queries becomes cumbersome.
+Solution : Criteria API. 
+
+A Criteria is like a where clause where you will be imposing restrictions. It needs to know for which entity you are imposing the
+restrictions. After creating the criteria object to add the restrictions what you need.
+ex: 
+Criteria criteria = session.createCriteria(UserDetails.class);
+criteria.add(Restrictions.eq("userName", "user10"));
+List<UserDetails> crlist = (List<UserDetails>) criteria.list();
+
+We have only used eq() methods of Restrictions class. There are many mathods.
+
+====================================================================================================================================
+
+Tutorial 30: Understanding Restrictions
+----------------------------------------
+
+One good advantage of Criteria is that we can use chaining. Adding more Restrictions to the query.
+ex:
+Criteria criteria = session.createCriteria(UserDetails.class);
+
+criteria.add(Restrictions.gt("userId", 5))
+.add(Restrictions.eq("userName", "user10"))
+;
+
+criteria.add(Restrictions.like("userName", "%user1%"))
+.add(Restrictions.between("userId", 5, 20))
+;
+
+All the above criterias are doing a conjunction (and) operations. If we need to perform 'or' operations in the query we can do by
+using Restrictions.or(Rest1, Rest2);
+ex: 
+criteria.add(Restrictions.or(Restrictions.between("userId", 1, 3), Restrictions.between("userId", 5,8)));
+
+
+====================================================================================================================================
+
+Tutorial 31: Projections and Query By Example
+---------------------------------------------
+
+These are Criteria API features. 
+Projection is for aggregation functions, group functions. 
+ex: 
+Criteria criteria = session.createCriteria(UserDetails.class)
+					.setProjection(Projections.min("userId"));
+				 // .setProjection(Projections.count("userId"));	
+
+Criteria criteria = session.createCriteria(UserDetails.class)
+					.addOrder(Order.desc("userId"));					
+Query by Example:
+-----------------
+
+To filter the query based on your own condition :
+
+UserDetails exampleUser = new UserDetails();
+exampleUser.setUserName("user1%");
+Example example = Example.create(exampleUser).enableLike();
+Criteria criteria = session.createCriteria(UserDetails.class)
+						   .add(example);
+
+====================================================================================================================================
+
+Tutorial 32: Caching in hibernate
+---------------------------------
+
+First level Cache  : Session object.
+Second Level Cache : SessionFactory object.
+1. Across different sessions in an applications
+2. Across applications.
+3. Across clusters. (Different apps using same db)
+
+First level: Within a session, if we try to get the same object multiple times it will return single sql statememts since it is 
+there in the session object.
+
+If we close the session and then try to get the same object in a different session then this time 2 select statements will be 
+executed.
+
+
+====================================================================================================================================
+
+Tutorial 33: Configuring Second Level Cache
+-------------------------------------------
+
+Second Level: It exists between muliptle sessions within the Sessionfactory. Even if we close and open the session multiple times
+it will run only one select clause. It will look into the second level cache(SessionFactory). By default the second level cache
+is disabled and we need to enable it in the hibernate.cfg.xml file and mark what entities must be available in 2nd level cache.
+
+How to configure for second level cache ?
+
+1. Inside hibernate.cfg.xml : 
+<!-- Second-level cache -->
+<property name="cache.use_second_level_cache">true</property>
+<property name="cache.provider_class">org.hibernate.cache.EhCacheProvider</property>
+
+2. We need to add the ehcache-core-2.4.2.jar to the class path since we have choosen to use that provider.
+
+3. Configurng the entity. Telling hibernate that this entity should be available in second-level cache.
+@Entity
+@Cacheable
+@Cache(usage=CacheConcurrencyStrategy.READ_ONLY)
+Class user{}
+
+====================================================================================================================================
+
+Tutorial 34: Using Query Cache
+-------------------------------
+
+If we get the objects using session.createQuery("query"), then even is we try to get the same objects in multiple sessions and 
+second-level cache being enabled, it will run two select statements. Reason hb differentiates second-level cache and query cache.
+The results of both are kept in different memeory locations. To overcome this we need to use query cache. It is not enable by default.
+
+To enable it in hibernate.cfg.xml :
+<property name="cache.use_query_cache">true</property> 
+     &
+Query query = session.createQuery("from UserDetails where userId = 3");    
+query.setCacheable(true);
+
+What does setCacheable() does ?
+It first checks the Cache for the query and if it is not there it will hit the database and if it is there in the cache then it will
+read it from the cache instead of going to the db.
+
+We need to be careful while using query cache as it may lead to performance issue if the same db is being used bu multiple applications
+or the query is cached but not used for long time.
+
+====================================================================================================================================
