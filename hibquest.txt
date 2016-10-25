@@ -17,7 +17,7 @@ Automatic conversion of data types from java to SQL. (**)
 3. Different annotations on fileds ? [Tutorial 5]
 Ans: By Default the annotation for every field is "@Basic" which tells hibernate to persist in db.
 
-Also if you don't want any fields to be persisted in db marked that fiels as 'static' or marked it as "@Transient".
+Also if you don't want any fields to be persisted in db marked that field as 'static' or marked it as "@Transient".
 
 While persisting any date field in db the dafult timestamp takes everything (date and time).
 If you want only Date use : "@Temporal (TemporalType.DATE)"

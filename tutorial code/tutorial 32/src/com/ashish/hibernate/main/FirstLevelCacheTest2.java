@@ -17,7 +17,7 @@ public class FirstLevelCacheTest2 {
 		Session session = factory.openSession();
 		session.beginTransaction();
 
-		UserDetails user = (UserDetails) session.get(UserDetails.class, 5);
+		UserDetails user = (UserDetails) session.get(UserDetails.class, 2);
 		
 		session.getTransaction().commit();
 		session.close();
@@ -27,7 +27,7 @@ public class FirstLevelCacheTest2 {
 		Session session2 = factory.openSession();
 		session2.beginTransaction();
 
-		UserDetails user2 = (UserDetails) session2.get(UserDetails.class, 5);
+		UserDetails user2 = (UserDetails) session2.get(UserDetails.class, 2);
 		
 		session2.getTransaction().commit();
 		session2.close();

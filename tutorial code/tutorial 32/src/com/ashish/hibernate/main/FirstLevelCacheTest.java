@@ -17,17 +17,19 @@ public class FirstLevelCacheTest {
 		Session session = factory.openSession();
 		session.beginTransaction();
 
-		UserDetails user = (UserDetails) session.get(UserDetails.class, 5);
+		UserDetails user = (UserDetails) session.get(UserDetails.class, 2);
 		
 		/**
 		 * Some lines of code here...
 		 */
 		
-		UserDetails user2 = (UserDetails) session.get(UserDetails.class, 5);
+		UserDetails user2 = (UserDetails) session.get(UserDetails.class, 2);
+		
+		System.out.println("user: " + user.getUserName());
+		System.out.println("user2: " + user2.getUserName());
 
 		session.getTransaction().commit();
 		session.close();
-
 		
 	}
 }
