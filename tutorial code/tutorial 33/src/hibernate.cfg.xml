@@ -21,12 +21,12 @@
 
 		<!-- Second-level cache -->
 		<property name="cache.use_second_level_cache">true</property>
-		<property name="cache.provider_class">org.hibernate.cache.EhCacheProvider</property>
+		<property name="cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory</property>
 
 		<!-- Echo all executed SQL to stdout -->
 		<property name="show_sql">true</property>
 
-		<!-- Drop and re-create the database schema on startup [create] ow [update] 
+		<!-- Drop and re-create the database schema on startup [create] or [update] 
 			to update the schema -->
 		<property name="hbm2ddl.auto">update</property>
 
